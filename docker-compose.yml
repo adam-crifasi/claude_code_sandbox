@@ -1,0 +1,20 @@
+services:
+  claude-code:
+    build: .
+    image: claude-code-sandboxed
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    environment:
+      # Pass through your API key if you use one instead of `claude login`
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+    volumes:
+      # Only the caller's current directory is exposed, as /workspace.
+      - ${WORKSPACE_DIR:-.}:/workspace
+      # Container's home dir lives in a Docker-managed volume, NOT a host
+      # path, so `claude login` state / config persists between runs
+      # without giving the container access to your real home directory.
+      - claude-home:/root
+
+volumes:
+  claude-home:

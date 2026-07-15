@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Launches Claude Code in a sandboxed Docker container that can only
+# read/write the directory you run this from (mounted as /workspace).
+set -euo pipefail
+
+# Resolve the real location of this script (so it works via symlink/PATH)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do
+  DIR="$(cd -- "$(dirname -- "$SOURCE")" &>/dev/null && pwd)"
+  SOURCE="$(readlink -- "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -- "$(dirname -- "$SOURCE")" &>/dev/null && pwd)"
+
+# The directory the user actually invoked this from
+export WORKSPACE_DIR="$PWD"
+
+exec docker compose -f "$SCRIPT_DIR/docker-compose.yml" run --rm --build claude-code "$@"
